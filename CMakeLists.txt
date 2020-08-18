@@ -20,6 +20,7 @@ include_directories(
   ${CMAKE_SOURCE_DIR}/skia/include/config
   ${CMAKE_SOURCE_DIR}/skia/include/utils
   ${CMAKE_SOURCE_DIR}/skia/include/gpu
+  ${CMAKE_SOURCE_DIR}/skia/third_party/externals/sdl/include
 )
 link_directories(
   ${CMAKE_SOURCE_DIR}/tmp
@@ -28,7 +29,7 @@ link_directories(
 
 # example
 #~~~~~~~~~~
-file(GLOB example_files "src/*.cpp")
+file(GLOB example_files "src/SkiaSDLExample.cpp")
 add_executable(example
   ${example_files}
 )
@@ -47,6 +48,8 @@ else()
   find_package(Threads REQUIRED)
   find_package(OpenGL REQUIRED)
 
+  find_package(SDL2 REQUIRED)
+
   find_package(PkgConfig)
   pkg_check_modules(FONTCONFIG REQUIRED fontconfig)
 
@@ -60,6 +63,7 @@ else()
 
   target_link_libraries(example
     skia
+    SDL2::SDL2 -D_REENTRANT
     ${OPENGL_LIBRARIES}
     ${FONTCONFIG_LIBRARIES}
     ${CMAKE_THREAD_LIBS_INIT}
@@ -78,7 +82,7 @@ add_custom_target(skia
 )
 add_custom_command(
   OUTPUT tmp/libskia.a
-  COMMAND python tools/git-sync-deps
+  COMMAND python2 tools/git-sync-deps
   COMMAND ${gn_path} gen out/Static --args='is_debug=false　target_cpu="x64" is_official_build=true skia_use_system_libjpeg_turbo=false skia_use_system_libpng=false skia_use_system_libwebp=false skia_use_system_icu=false'
   COMMAND ${ninja_path} -C out/Static
   COMMAND ${CMAKE_COMMAND} -E copy
